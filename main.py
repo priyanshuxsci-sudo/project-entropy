@@ -7,4 +7,5 @@ class Router:
         self.query = query
         self.model_name = model_name
         provider, model = model_name.split("/", 1)
-        return ADAPTORS[provider](model, query)
+        response, token = ADAPTORS[provider](model, query)
+        return response, token
