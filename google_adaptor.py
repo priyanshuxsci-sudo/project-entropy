@@ -7,7 +7,7 @@ load_dotenv()
 API_KEY = os.getenv("GEMINI_API_KEY")
 headers = {"Content-Type": "application/json"}
 
-def google_ai(model, query):
+def google_ai(provider, model, query):
     MODEL_ID = model
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={API_KEY}"
     payload = {
@@ -20,6 +20,6 @@ def google_ai(model, query):
 
     response = requests.post(url, headers=headers, json=payload)
     if response.status_code== 200:
-        return response.json()["candidates"][0]["content"]["parts"][0]["text"] , response.json()["candidates"]["usageMetadata"]["totalTokenCount"]
+        return response.json()["candidates"][0]["content"]["parts"][0]["text"]
     else:
         return f"Error: {response.status_code} - {response.text}", None
