@@ -1,0 +1,29 @@
+List of Models Currently Available
+--(MISTRAL MODELS)
+1. Ministral 3 3B
+    mistral/ministral-3b-2512
+2. Ministral 3 8B
+    mistral/ministral-8b-2512
+3. Ministral 3 14B
+    mistral/ministral-14b-2512
+4. Mistral Large 4
+    mistral/mistral-large-4
+
+--(GOOGLE GEMINI MODELS)
+1. Gemini 3.6 Flash
+    google/gemini-3.6-flash
+2. Gemini 3.6 Flash Lite
+    google/gemini-3.6-flash-lite
+3. Gemini 3.7 Flash
+    google/gemini-3.7-flash
+4. Gemini 3.7 Flash Lite
+    google/gemini-3.7-flash-lite
+5. Gemma 4 31B
+    google/gemma-4-31b-it
+
+--(NVIDIA MODELS)
+1. Nemotron 3.5 Lightning 30B
+    nvidia/nemotron-3.5-lightning-30b-a3b
+2. Nemotron 3 Ultra 550B
+    nvidia/nemotron-3-ultra-550b-a55b
+
