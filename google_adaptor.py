@@ -17,9 +17,17 @@ def google_ai(provider, model, query):
             }
         ]
     }
-
-    response = requests.post(url, headers=headers, json=payload)
-    if response.status_code== 200:
-        return response.json()["candidates"][0]["content"]["parts"][0]["text"]
-    else:
-        return f"Error: {response.status_code} - {response.text}", None
+    for _ in range(3):
+        try:
+            response = requests.post(url, headers=headers, json=payload)
+            response.raise_for_status()
+            return response.json()["candidates"][0]["content"]["parts"][0]["text"]
+        except requests.exceptions.HTTPError as error:
+            status_code = error.response.status_code
+            if status_code not in {408, 409, 429} and status_code < 500:
+                raise
+            if _ == 2:
+                raise
+        except requests.exceptions.RequestException as e:
+            if _ == 2:
+                raise e
