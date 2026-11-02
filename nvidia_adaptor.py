@@ -21,7 +21,10 @@ def nvidia_ai(provider, model, query):
         max_tokens=2048,
         stream=False
       )
-      return completion.choices[0].message.content or ""
+      return completion.choices[0].message.content or "", {
+    "prompt_token": completion.usage.prompt_tokens,
+    "output_token": completion.usage.completion_tokens,
+}
     except APIConnectionError:
       if attempt == 2:
         raise

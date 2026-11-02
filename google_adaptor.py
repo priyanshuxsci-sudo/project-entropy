@@ -8,7 +8,6 @@ API_KEY = os.getenv("GEMINI_API_KEY")
 headers = {"Content-Type": "application/json"}
 
 def google_ai(provider, model, query):
-    MODEL_ID = model
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={API_KEY}"
     payload = {
         "contents": [
@@ -21,7 +20,13 @@ def google_ai(provider, model, query):
         try:
             response = requests.post(url, headers=headers, json=payload)
             response.raise_for_status()
-            return response.json()["candidates"][0]["content"]["parts"][0]["text"]
+            data = response.json()
+            usage = data.get("usageMetadata", {})
+            return data["candidates"][0]["content"]["parts"][0]["text"], {
+                "prompt_tokens": usage.get("promptTokenCount", 0),
+                "completion_tokens": usage.get("candidatesTokenCount", 0),
+                "total_tokens": usage.get("totalTokenCount", 0),
+            }
         except requests.exceptions.HTTPError as error:
             status_code = error.response.status_code
             if status_code not in {408, 409, 429} and status_code < 500:

@@ -1,5 +1,5 @@
 List of Models Currently Available.
-=="For General Conversations Text to Text"
+=="For General Conversations Text/Image to Text"
 --(MISTRAL MODELS)
 1. Ministral 3 3B
     mistral/ministral-3b-2512
@@ -33,4 +33,3 @@ List of Models Currently Available.
     meta/muse-glimmer-30b
 
 ==TOTAL MODELS Available -> 12
-

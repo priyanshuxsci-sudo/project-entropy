@@ -9,7 +9,12 @@ def mistral_ai(provider, model, query):
                 model=model,
                 messages=[{"role": "user", "content": query}],
             )
-            return response.choices[0].message.content
+            usage = response.usage
+            return response.choices[0].message.content, {
+                "prompt_tokens": usage.prompt_tokens,
+                "completion_tokens": usage.completion_tokens,
+                "total_tokens": usage.total_tokens,
+            }
         except Exception as e:
             if attempt == 2:
                 raise e
