@@ -1,16 +1,14 @@
-import json
-import requests
 from router import Router
 
 
 payload = {
-  "model": "google/gemini-3.7-flash-lite",
-  "messages": [{"role": "user", "content": "Tell me a joke."}],
-  "fallbacks": ["mistral/ministral-3b-2512"],
+  "model": "mistral/ministral-3b-2512",
+  "messages": [{"role": "user", "content": "You can tell me a pj?"}],
+  "fallbacks": ["nvidia/nemotron-3.5-lightning-30b-a3b"],
   "grounding": "off"
 }
 
-output = Router(payload["model"], payload["messages"][0]["content"], payload["fallbacks"])
+output = Router(payload["model"], payload["messages"][0]["content"], payload["grounding"], payload["fallbacks"])
 print(output.output)
 
 

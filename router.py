@@ -3,18 +3,25 @@ import json
 from registory import ADAPTORS
 import uuid
 import time
+from tavily_grounding import tavily_search
 
 class Router:
-    def __init__(self, model_name, query, fallbacks=None):
+    def __init__(self, model_name, query, grounding, fallbacks=None):
         candidates = [model_name] + (fallbacks or [])
         self.query = query
         self.model_name = model_name
+        self.grounding = grounding
 
         print(f"\nRouter initialized with model: {model_name}\n")
+        
         for name in candidates:
             try:
-                provider, model = name.split("/", 1)
                 start_time = time.perf_counter()
+                if self.grounding == "on":
+                    context = tavily_search(query)
+                    query = f" Here's the Context:\n{context or ''}\n\nUser Query:\n{query}"
+
+                provider, model = name.split("/", 1)
                 self.a_response, self.usage = ADAPTORS[provider](provider, model, query)
                 self.used_model = name
                 self.output = {
@@ -34,7 +41,7 @@ class Router:
                     "entropy": {
                         "fallback_used": True if self.used_model != self.model_name else False,
                         "latency_ms": round((time.perf_counter() - start_time) * 1000),
-                        "grounding": "off"
+                        "grounding": "on" if self.grounding == "on" else "off"
                     }
                 }
                 return

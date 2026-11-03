@@ -1,38 +1,39 @@
 import os
-import requests
-import json
+
 from dotenv import load_dotenv
+from google import genai
+
 load_dotenv()
 
-API_KEY = os.getenv("GEMINI_API_KEY")
-headers = {"Content-Type": "application/json"}
+INSTRUCTIONS = (
+    "In some cases, context will be provided to help answer the user's query. "
+    "If context is provided, use it to answer the query. If no context is "
+    "provided, answer based on your own knowledge. Do not output the context "
+    "verbatim; use your own words."
+)
+
 
 def google_ai(provider, model, query):
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={API_KEY}"
-    payload = {
-        "contents": [
-            {
-                "parts": [{"text": query}]
-            }
-        ]
-    }
-    for _ in range(3):
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        raise RuntimeError(
+            "GEMINI_API_KEY is not set. Add it to the environment or .env file."
+        )
+    for _ in range(2):
         try:
-            response = requests.post(url, headers=headers, json=payload)
-            response.raise_for_status()
-            data = response.json()
-            usage = data.get("usageMetadata", {})
-            return data["candidates"][0]["content"]["parts"][0]["text"], {
-                "prompt_tokens": usage.get("promptTokenCount", 0),
-                "completion_tokens": usage.get("candidatesTokenCount", 0),
-                "total_tokens": usage.get("totalTokenCount", 0),
+            client = genai.Client(api_key=api_key)
+
+            interaction = client.interactions.create(
+                model=model,
+                input=f"{INSTRUCTIONS}\n\nUser query:\n{query}",
+            )
+
+            print(interaction.output_text)
+            usage = interaction.usage
+            return interaction.output_text, {
+                "prompt_token": usage.total_input_tokens,
+                "output_token": usage.total_output_tokens,
+                "total_token": usage.total_tokens,
             }
-        except requests.exceptions.HTTPError as error:
-            status_code = error.response.status_code
-            if status_code not in {408, 409, 429} and status_code < 500:
-                raise
-            if _ == 2:
-                raise
-        except requests.exceptions.RequestException as e:
-            if _ == 2:
-                raise e
+        except Exception as e:
+            print(f"Error occurred: {e}. (ENTROPY) Retrying...")

@@ -14,8 +14,9 @@ def nvidia_ai(provider, model, query):
       completion = client.chat.completions.create(
         model=provider + "/" + model,
         messages=[
-            {"role": "user", "content": query}
-          ],
+          {"role": "system", "content": "In 'some cases', you'll be provided with context to help you answer the user's query. If context is provided, use it to answer the query. If no context is provided, answer the query based on your own knowledge. Also don't just output the context. It's only for your reference. You should answer the query in your own words."},
+          {"role": "user", "content": query}
+        ],
         temperature=1,
         top_p=0.95,
         max_tokens=2048,
