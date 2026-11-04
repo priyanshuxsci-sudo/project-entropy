@@ -4,6 +4,7 @@ from registory import ADAPTORS
 import uuid
 import time
 from tavily_grounding import tavily_search
+from caller import auto_caller
 
 class Router:
     def __init__(self, model_name, query, grounding, fallbacks=None):
@@ -20,6 +21,15 @@ class Router:
                 if self.grounding == "on":
                     context = tavily_search(query)
                     query = f" Here's the Context:\n{context or ''}\n\nUser Query:\n{query}"
+                if self.grounding == "auto":
+                    auto_response = auto_caller(query).strip()
+                    if auto_response.startswith("```"):
+                        lines = auto_response.splitlines()
+                        if lines[0].strip().lower() in ("```json", "```"):
+                            lines = lines[1:]
+                        if lines and lines[-1].strip() == "```":
+                            lines = lines[:-1]
+                        auto_response = "\n".join(lines)
 
                 provider, model = name.split("/", 1)
                 self.a_response, self.usage = ADAPTORS[provider](provider, model, query)
