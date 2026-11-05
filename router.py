@@ -12,25 +12,42 @@ class Router:
         self.query = query
         self.model_name = model_name
         self.grounding = grounding
+        self.searched = False
 
         print(f"\nRouter initialized with model: {model_name}\n")
-        
-        for name in candidates:
-            try:
-                start_time = time.perf_counter()
-                if self.grounding == "on":
-                    context = tavily_search(query)
-                    query = f" Here's the Context:\n{context or ''}\n\nUser Query:\n{query}"
-                if self.grounding == "auto":
-                    auto_response = auto_caller(query).strip()
-                    if auto_response.startswith("```"):
-                        lines = auto_response.splitlines()
-                        if lines[0].strip().lower() in ("```json", "```"):
-                            lines = lines[1:]
-                        if lines and lines[-1].strip() == "```":
-                            lines = lines[:-1]
-                        auto_response = "\n".join(lines)
 
+        start_time = time.perf_counter()
+        if self.grounding == "on":
+            context = tavily_search(query)
+            query = f" Here's the Context:\n{context or ''}\n\nUser Query:\n{query}"
+            self.searched = True
+        if self.grounding == "auto":
+            auto_response = auto_caller(query).strip()
+            if auto_response.startswith("```"):
+                lines = auto_response.splitlines()
+                if lines[0].strip().lower() in ("```json", "```"):
+                    lines = lines[1:]
+                if lines and lines[-1].strip() == "```":
+                    lines = lines[:-1]
+                auto_response = "\n".join(lines)
+
+                print(f"\nAuto-caller response:\n{auto_response}\n")
+                search_query = query
+                try:
+                    start = auto_response.index("{")
+                    end = auto_response.rindex("}") + 1
+                    decision = json.loads(auto_response[start:end])
+                    self.searched = decision.get("search_grounding") is True
+                    search_query = decision.get("query", query)
+                except (ValueError, TypeError):
+                    self.searched = False
+        
+                if self.searched:
+                    context = tavily_search(search_query)
+                    query = f"Here's the context :\n{context or ''}\n\nUser Query:\n{query}"
+
+        for name in candidates:
+            try:       
                 provider, model = name.split("/", 1)
                 self.a_response, self.usage = ADAPTORS[provider](provider, model, query)
                 self.used_model = name
@@ -51,8 +68,11 @@ class Router:
                     "entropy": {
                         "fallback_used": True if self.used_model != self.model_name else False,
                         "latency_ms": round((time.perf_counter() - start_time) * 1000),
-                        "grounding": "on" if self.grounding == "on" else "off"
-                    }
+                        "grounding": {
+                            "mode" : self.grounding,
+                            "searched": self.searched
+                        },
+                }
                 }
                 return
             except Exception as error:

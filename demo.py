@@ -2,9 +2,9 @@ from router import Router
 
 
 payload = {
-  "model": "mistral/ministral-3b-2512",
+  "model": "google/gemini-3.6-flash",
   "messages": [{"role": "user", "content": "You can tell me about the latest research on quantum computing?"}],
-  "fallbacks": ["nvidia/nemotron-3.5-lightning-30b-a3b"],
+  "fallbacks": ["mistral/ministral-3b-2512"],
   "grounding": "auto"
 }
 
