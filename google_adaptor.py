@@ -1,5 +1,4 @@
 import os
-
 from dotenv import load_dotenv
 from google import genai
 
@@ -28,7 +27,6 @@ def google_ai(provider, model, query):
                 input=f"{INSTRUCTIONS}\n\nUser query:\n{query}",
             )
 
-            print(interaction.output_text)
             usage = interaction.usage
             return interaction.output_text, {
                 "prompt_token": usage.total_input_tokens,

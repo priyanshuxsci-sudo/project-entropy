@@ -31,7 +31,7 @@ class Router:
                     lines = lines[:-1]
                 auto_response = "\n".join(lines)
 
-                print(f"\nAuto-caller response:\n{auto_response}\n")
+                
                 search_query = query
                 try:
                     start = auto_response.index("{")
